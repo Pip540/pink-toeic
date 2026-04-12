@@ -1,0 +1,26 @@
+name = "pink-toeic"
+main = "src/index.ts"
+compatibility_date = "2025-03-01"
+minify = true
+
+[vars]
+WORKER_NAME = "Pink"
+WORKER_GREETING = "Hello! I'm Pink — your TOEIC score coach. Tell me your current score, your target, and your deadline. Let's find your weak spots and fix them fast."
+ACCESS_GATE = "true"
+FREE_QUESTION_LIMIT = "10"
+
+[[r2_buckets]]
+binding = "CONTENT"
+bucket_name = "pink-toeic-content"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pink-toeic-analytics"
+database_id = "67f4e2ce-4269-40ec-9d5d-a432cd7034cb"
+
+[[unsafe.bindings]]
+name = "CHAT_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1004"
+simple = { limit = 20, period = 60 }
+
