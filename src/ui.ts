@@ -54,6 +54,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
     #topbar-actions{display:flex;gap:0.5rem;align-items:center}
     .btn-topbar{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:0.72rem;font-family:var(--font);padding:0.3rem 0.6rem;cursor:pointer}
     .btn-topbar:hover{border-color:var(--pink);color:var(--pink)}
+    #btn-reset{background:var(--pink);border-color:var(--pink);color:#121212;font-weight:700;padding:0.35rem 0.85rem}
 
     /* ── chat screen ── */
     #chat-screen{display:none;flex-direction:column;height:100%;overflow:hidden}
