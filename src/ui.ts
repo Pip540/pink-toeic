@@ -184,6 +184,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
     <input type="text" id="input-classroom" autocomplete="off" style="text-transform:uppercase"/>
     <button class="btn-primary" id="btn-start">Start with ${name}</button>
     <p style="font-size:0.7rem;color:var(--muted);text-align:center;margin-top:0.75rem" id="privacy-note">This information never leaves your device</p>
+    <p style="text-align:center;margin-top:0.6rem"><button id="btn-back-lang" style="background:none;border:none;color:var(--muted);font-size:0.72rem;font-family:var(--font);cursor:pointer;text-decoration:underline">&#8592; Change language</button></p>
   </div>
 </div>
 
@@ -382,6 +383,12 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
     document.getElementById('lang-overlay').style.display = 'none';
     document.getElementById('overlay').style.display = 'flex';
     try { applyFormTranslations(language); } catch(e) { console.error('applyFormTranslations error:', e); }
+  };
+
+  document.getElementById('btn-back-lang').onclick = function() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('lang-overlay').style.display = 'flex';
+    localStorage.removeItem(LANGUAGE_KEY);
   };
 
   // ── Profile Form ──────────────────────────────────────────────────────────────
