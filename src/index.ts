@@ -329,6 +329,19 @@ async function handleUpload(request: Request, env: Env): Promise<Response> {
     });
   }
 
+  const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+  const MAX_SIZE = 5 * 1024 * 1024;
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return new Response(JSON.stringify({ ok: false, error: 'File type not allowed. Use PDF, JPG, PNG or WebP.' }), {
+      status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+    });
+  }
+  if (file.size > MAX_SIZE) {
+    return new Response(JSON.stringify({ ok: false, error: 'File too large. Maximum size is 5 MB.' }), {
+      status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+    });
+  }
+
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const code = 'PNK-' + Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   const arrayBuffer = await file.arrayBuffer();
