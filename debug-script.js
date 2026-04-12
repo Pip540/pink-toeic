@@ -1,241 +1,4 @@
-export function renderChatUI(name: string, greeting: string, accessGate: boolean, freeLimit: number): string {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-  <meta name="theme-color" content="#121212"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <title>${name} — TOEIC Score Coach</title>
-  <link rel="manifest" href="/manifest.json"/>
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --black:#121212;
-      --pink:#f472b6;
-      --pink-dark:#db2777;
-      --pink-muted:#f9a8d4;
-      --bg:#121212;
-      --card:#1a1a1a;
-      --border:#2a2a2a;
-      --text:#f0f0f0;
-      --muted:#888888;
-      --font:'IBM Plex Mono',monospace;
-    }
-    html,body{height:100%;overflow:hidden}
-    body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px}
 
-    /* ── overlays ── */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem}
-    .overlay-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;width:100%;max-width:400px;max-height:90vh;overflow-y:auto}
-    .overlay-box h2{color:var(--pink);font-size:1.1rem;margin-bottom:0.4rem}
-    .overlay-box p{color:var(--muted);font-size:0.78rem;margin-bottom:1.2rem;line-height:1.5}
-    label{display:block;font-size:0.75rem;color:var(--muted);margin-bottom:0.3rem;margin-top:0.9rem}
-    select,input{width:100%;background:#0f0f0f;border:1px solid var(--border);border-radius:6px;color:var(--text);padding:0.6rem 0.8rem;font-size:0.88rem;font-family:var(--font);appearance:none;-webkit-appearance:none}
-    select:focus,input:focus{outline:none;border-color:var(--pink)}
-    .btn-primary{display:block;width:100%;background:var(--pink);color:#121212;border:none;border-radius:8px;padding:0.85rem;font-size:0.95rem;font-weight:700;font-family:var(--font);cursor:pointer;margin-top:1.4rem;letter-spacing:0.02em}
-    .btn-primary:hover{background:var(--pink-muted)}
-
-    /* ── language modal ── */
-    #lang-overlay .overlay-box h2{margin-bottom:1rem}
-    #lang-select{margin-bottom:0}
-
-    /* ── topbar ── */
-    #topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-    #topbar-left{display:flex;align-items:center;gap:0.75rem}
-    #topbar-avatar{width:36px;height:36px;background:var(--pink);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:#121212;flex-shrink:0}
-    #topbar-name{font-weight:700;font-size:0.95rem;color:var(--pink)}
-    #topbar-sub{font-size:0.72rem;color:var(--muted)}
-    #topbar-actions{display:flex;gap:0.5rem;align-items:center}
-    .btn-topbar{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:0.72rem;font-family:var(--font);padding:0.3rem 0.6rem;cursor:pointer}
-    .btn-topbar:hover{border-color:var(--pink);color:var(--pink)}
-
-    /* ── chat screen ── */
-    #chat-screen{display:none;flex-direction:column;height:100%;overflow:hidden}
-    #messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.75rem}
-    #messages::-webkit-scrollbar{width:4px}
-    #messages::-webkit-scrollbar-track{background:transparent}
-    #messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-
-    /* ── bubbles ── */
-    .msg-row{display:flex}
-    .msg-row.user{justify-content:flex-end}
-    .msg-row.assistant{justify-content:flex-start}
-    .bubble{max-width:80%;padding:0.7rem 0.9rem;border-radius:12px;font-size:0.88rem;line-height:1.6}
-    .msg-row.user .bubble{background:var(--pink-dark);color:#fff;border-bottom-right-radius:3px}
-    .msg-row.assistant .bubble{background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:3px}
-    .btn-speak{display:block;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:var(--font);font-size:0.68rem;padding:0.2rem 0.5rem;cursor:pointer;margin-top:0.4rem}
-    .btn-speak:hover,.btn-speak.speaking{border-color:var(--pink);color:var(--pink)}
-
-    /* ── milestone ── */
-    .milestone{text-align:center;font-size:0.72rem;color:var(--pink);padding:0.4rem 0;opacity:0.8}
-
-    /* ── input area ── */
-    #input-area{padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-shrink:0;background:var(--bg)}
-    #user-input{flex:1;background:#0f0f0f;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:0.88rem;padding:0.6rem 0.8rem;resize:none;min-height:42px;max-height:120px;overflow-y:auto;line-height:1.5}
-    #user-input:focus{outline:none;border-color:var(--pink)}
-    #btn-send{background:var(--pink);border:none;border-radius:8px;color:#121212;font-weight:700;font-family:var(--font);font-size:0.88rem;padding:0.6rem 1rem;cursor:pointer;flex-shrink:0;height:42px}
-    #btn-send:hover{background:var(--pink-muted)}
-    #btn-send:disabled{background:#444;cursor:default}
-
-    /* ── day limit banner ── */
-    #limit-banner{display:none;background:#1a0a0a;border:1px solid #f55;border-radius:8px;padding:0.75rem 1rem;margin:0.5rem 1rem;font-size:0.8rem;color:#f88;text-align:center}
-
-    /* ── access gate ── */
-    #access-overlay .overlay-box p{margin-bottom:1rem}
-    #access-input{margin-bottom:0.5rem}
-    #access-error{font-size:0.78rem;color:#f55;margin-top:0.4rem;display:none}
-
-    /* ── feedback modal ── */
-    #feedback-overlay textarea{width:100%;background:#0f0f0f;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);font-size:0.85rem;padding:0.65rem;resize:vertical;min-height:100px;margin-top:0.5rem}
-    #feedback-overlay textarea:focus{outline:none;border-color:var(--pink)}
-    #feedback-status{font-size:0.8rem;margin-top:0.5rem;display:none}
-    .btn-secondary{display:block;width:100%;background:transparent;border:1px solid var(--pink);color:var(--pink);border-radius:8px;padding:0.75rem;font-size:0.88rem;font-family:var(--font);cursor:pointer;margin-top:0.75rem}
-    .btn-secondary:hover{background:rgba(244,114,182,0.08)}
-
-    /* ── typing indicator ── */
-    #typing{display:none;padding:0 1rem 0.5rem;color:var(--muted);font-size:0.75rem}
-
-    /* ── daily limit notice ── */
-    #daily-limit-msg{display:none;padding:1rem;text-align:center;color:var(--muted);font-size:0.82rem}
-  </style>
-</head>
-<body>
-
-<!-- Language Modal -->
-<div id="lang-overlay" class="overlay">
-  <div class="overlay-box">
-    <h2>${name}</h2>
-    <p>TOEIC Score Coach — choose your language to begin</p>
-    <select id="lang-select">
-      <option value="Vietnamese">Tieng Viet (Vietnamese)</option>
-      <option value="English">English</option>
-      <option value="Khmer">Phasa Khmer (Khmer)</option>
-      <option value="Thai">Phasa Thai (Thai)</option>
-      <option value="Tagalog">Tagalog (Filipino)</option>
-      <option value="Indonesian">Bahasa Indonesia</option>
-      <option value="Malay">Bahasa Melayu (Malay)</option>
-      <option value="Mandarin">Zhongwen (Mandarin)</option>
-      <option value="Korean">Hangugeo (Korean)</option>
-      <option value="Japanese">Nihongo (Japanese)</option>
-      <option value="Hindi">Hindi</option>
-      <option value="French">Francais (French)</option>
-      <option value="Spanish">Espanol (Spanish)</option>
-      <option value="German">Deutsch (German)</option>
-      <option value="Russian">Russkiy (Russian)</option>
-    </select>
-    <button class="btn-primary" id="btn-lang-confirm">Continue</button>
-  </div>
-</div>
-
-<!-- Profile Form -->
-<div id="overlay" class="overlay" style="display:none">
-  <div class="overlay-box">
-    <h2 id="form-heading">Before we begin</h2>
-    <p id="form-subtitle">I'm ${name}, your TOEIC score coach. Tell me about your goal so I can target your weakest spots first.</p>
-    <label id="label-name">Your name (optional)</label>
-    <input type="text" id="input-name" autocomplete="off"/>
-    <label id="label-current">Current TOEIC score</label>
-    <select id="input-current">
-      <option value="" id="current-default">— select your score —</option>
-      <option value="Not sure yet">Not sure yet</option>
-      <option value="Under 300">Under 300</option>
-      <option value="300-400">300 to 400</option>
-      <option value="400-500">400 to 500</option>
-      <option value="500-600">500 to 600</option>
-      <option value="600-700">600 to 700</option>
-      <option value="700-800">700 to 800</option>
-      <option value="800+">800 or above</option>
-    </select>
-    <label id="label-target">Target TOEIC score</label>
-    <select id="input-target">
-      <option value="" id="target-default">— select your target —</option>
-      <option value="450 (graduation)">450 — graduation</option>
-      <option value="550">550</option>
-      <option value="600 (good graduate)">600 — good graduate</option>
-      <option value="700">700</option>
-      <option value="750">750</option>
-      <option value="800">800</option>
-      <option value="850+">850 or above</option>
-      <option value="900+">900 or above</option>
-    </select>
-    <label id="label-deadline">Study deadline</label>
-    <select id="input-deadline">
-      <option value="" id="deadline-default">— select deadline —</option>
-      <option value="1 month">1 month</option>
-      <option value="2 months">2 months</option>
-      <option value="3 months">3 months</option>
-      <option value="6 months">6 months</option>
-      <option value="Flexible">Flexible</option>
-    </select>
-    <label id="label-weak">Weakest area</label>
-    <select id="input-weak">
-      <option value="" id="weak-default">— select area —</option>
-      <option value="Listening">Listening</option>
-      <option value="Reading">Reading</option>
-      <option value="Both equally">Both equally</option>
-    </select>
-    <label id="label-classroom">Classroom Code (optional — from your trainer)</label>
-    <input type="text" id="input-classroom" autocomplete="off" style="text-transform:uppercase"/>
-    <button class="btn-primary" id="btn-start">Start with ${name}</button>
-    <p style="font-size:0.7rem;color:var(--muted);text-align:center;margin-top:0.75rem" id="privacy-note">This information never leaves your device</p>
-  </div>
-</div>
-
-<!-- Access Gate -->
-<div id="access-overlay" class="overlay" style="display:none">
-  <div class="overlay-box">
-    <h2>Access Code Required</h2>
-    <p>Enter your access code to continue with ${name}.</p>
-    <input type="text" id="access-input" placeholder="Enter code" style="text-transform:uppercase" autocomplete="off"/>
-    <div id="access-error">Invalid code. Please try again.</div>
-    <button class="btn-primary" id="btn-access">Unlock</button>
-  </div>
-</div>
-
-<!-- Feedback Modal -->
-<div id="feedback-overlay" class="overlay" style="display:none">
-  <div class="overlay-box">
-    <h2 id="feedback-title">Feedback</h2>
-    <p>Questions, issues or suggestions? Let us know.</p>
-    <textarea id="feedback-text" placeholder="Your message..."></textarea>
-    <div id="feedback-status"></div>
-    <button class="btn-primary" id="btn-feedback-send">Send</button>
-    <button class="btn-secondary" id="btn-feedback-close">Cancel</button>
-  </div>
-</div>
-
-<!-- Chat Screen -->
-<div id="chat-screen">
-  <div id="topbar">
-    <div id="topbar-left">
-      <div id="topbar-avatar">P</div>
-      <div>
-        <div id="topbar-name">${name}</div>
-        <div id="topbar-sub">TOEIC Score Coach</div>
-      </div>
-    </div>
-    <div id="topbar-actions">
-      <button class="btn-topbar" id="btn-feedback-open">Feedback</button>
-      <button class="btn-topbar" id="btn-reset">Reset</button>
-    </div>
-  </div>
-  <div id="limit-banner"></div>
-  <div id="messages"></div>
-  <div id="typing">Pink is thinking...</div>
-  <div id="daily-limit-msg"></div>
-  <div id="input-area">
-    <textarea id="user-input" rows="1" placeholder="Type your message..."></textarea>
-    <button id="btn-send">Send</button>
-  </div>
-</div>
-
-<script>
 (function() {
   var PROFILE_KEY    = 'pink-profile';
   var HISTORY_KEY    = 'pink-history';
@@ -247,12 +10,12 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
   var DAY_KEY        = 'pink-day';
   var DAY_COUNT_KEY  = 'pink-day-count';
 
-  var FREE_LIMIT     = ${freeLimit};
-  var ACCESS_GATE    = ${accessGate};
+  var FREE_LIMIT     = 10;
+  var ACCESS_GATE    = true;
   var DAILY_LIMIT    = 10;
 
-  var name     = ${JSON.stringify(name)};
-  var greeting = ${JSON.stringify(greeting)};
+  var name     = "Pink";
+  var greeting = "Hello! I'm Pink — your TOEIC score coach. Tell me your current score, your target, and your deadline. Let's find your weak spots and fix them fast.";
   var language = localStorage.getItem(LANGUAGE_KEY) || 'Vietnamese';
   var profile  = {};
   var history  = [];
@@ -661,7 +424,8 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
           var value = _a.value;
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
-          var lines = buffer.split(String.fromCharCode(10));
+          var lines = buffer.split('
+');
           buffer = lines.pop();
           for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
@@ -786,7 +550,3 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
 
   boot();
 })();
-</script>
-</body>
-</html>`;
-}
