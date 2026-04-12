@@ -18,6 +18,10 @@ binding = "DB"
 database_name = "pink-toeic-analytics"
 database_id = "67f4e2ce-4269-40ec-9d5d-a432cd7034cb"
 
+routes = [
+  { pattern = "pink.asiaconnect.uk/*", zone_name = "asiaconnect.uk" }
+]
+
 [[unsafe.bindings]]
 name = "CHAT_RATE_LIMITER"
 type = "ratelimit"
