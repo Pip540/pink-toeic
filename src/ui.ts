@@ -367,12 +367,8 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
       return;
     }
 
-    if (storedLang) {
-      document.getElementById('lang-overlay').style.display = 'none';
-      document.getElementById('overlay').style.display = 'flex';
-    } else {
-      document.getElementById('lang-overlay').style.display = 'flex';
-    }
+    // Profile incomplete — always start at language screen
+    document.getElementById('lang-overlay').style.display = 'flex';
   }
 
   // ── Language Modal ─────────────────────────────────────────────────────────────
