@@ -643,7 +643,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: history.slice(-20),
+          messages: history.slice(-20).map(function(m) { return { role: m.role, content: m.content }; }),
           profile: Object.assign({}, profile, { session_id: sessionId }),
         }),
       });
