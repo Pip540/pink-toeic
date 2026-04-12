@@ -136,6 +136,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
 <!-- Profile Form -->
 <div id="overlay" class="overlay" style="display:none">
   <div class="overlay-box">
+    <button id="btn-back-lang" style="background:none;border:none;color:var(--muted);font-size:0.78rem;font-family:var(--font);cursor:pointer;padding:0;margin-bottom:0.75rem;display:block">&#8592; Change language</button>
     <h2 id="form-heading">Before we begin</h2>
     <p id="form-subtitle">I'm ${name}, your TOEIC score coach. Tell me about your goal so I can target your weakest spots first.</p>
     <label id="label-name">Your name (optional)</label>
@@ -184,7 +185,6 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
     <input type="text" id="input-classroom" autocomplete="off" style="text-transform:uppercase"/>
     <button class="btn-primary" id="btn-start">Start with ${name}</button>
     <p style="font-size:0.7rem;color:var(--muted);text-align:center;margin-top:0.75rem" id="privacy-note">This information never leaves your device</p>
-    <p style="text-align:center;margin-top:0.6rem"><button id="btn-back-lang" style="background:none;border:none;color:var(--muted);font-size:0.72rem;font-family:var(--font);cursor:pointer;text-decoration:underline">&#8592; Change language</button></p>
   </div>
 </div>
 
