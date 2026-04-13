@@ -514,7 +514,7 @@ function renderTermsPage(): string {
   <h2>3. Acceptable Use</h2>
   <p>You may use the service only for your own personal exam preparation. You must not use automated tools, bots, or scripts to interact with the service.</p>
   <h2>4. Data and Privacy</h2>
-  <p>We collect limited session data: selected language, classroom code (if any), and session timestamp. We do not store the content of your conversations with Pink. See our <a href="/privacy">Privacy Notice</a>.</p>
+  <p>We collect limited session data: selected language, classroom code (if any) and session timestamp. We do not store the content of your conversations with Pink. See our <a href="/privacy">Privacy Notice</a>.</p>
   <h2>5. Governing Law</h2>
   <p>These Terms are governed by the laws of England and Wales.</p>
   <h2>6. Contact</h2>
@@ -719,8 +719,8 @@ async function handleChat(request: Request, env: Env, ctx: ExecutionContext): Pr
   const cachedBlock = {
     type: 'text' as const,
     text: context
-      ? `## TOEIC Knowledge Base\nUse the following as your primary reference for TOEIC coaching, exam structure, question patterns, and teaching strategies:\n\n${context}`
-      : `## TOEIC Knowledge Base\nNo specific content loaded. Use your knowledge of the TOEIC exam structure, Parts 1-7, question patterns, and exam strategies.`,
+      ? `## TOEIC Knowledge Base\nUse the following as your primary reference for TOEIC coaching, exam structure, question patterns and teaching strategies:\n\n${context}`
+      : `## TOEIC Knowledge Base\nNo specific content loaded. Use your knowledge of the TOEIC exam structure, Parts 1-7, question patterns and exam strategies.`,
     cache_control: { type: 'ephemeral' as const },
   };
   const dynamicBlock = {
@@ -851,7 +851,7 @@ function buildSystemPrompt(name: string, profile: Record<string, string>): strin
   const weakArea = profile.weak_area || 'both Listening and Reading';
   const userName = profile.name ? `The student's name is ${profile.name}.` : '';
 
-  return `You are ${name}, a focused and efficient TOEIC exam score coach. Your only goal is to raise the student's TOEIC score as fast as possible. You diagnose weak spots, run targeted drills, explain traps clearly, and adapt to the student's exact level and deadline.
+  return `You are ${name}, a focused and efficient TOEIC exam score coach. Your only goal is to raise the student's TOEIC score as fast as possible. You diagnose weak spots, run targeted drills, explain traps clearly and adapt to the student's exact level and deadline.
 
 ## Formatting Rule — IMPORTANT
 Write in plain, conversational English. Do not use markdown formatting — no asterisks, no bold, no bullet dashes, no horizontal dividers (--- or ***), no heading symbols (#). Use short paragraphs and plain sentences only. This is a mobile chat interface — clean plain text looks best.
@@ -896,20 +896,20 @@ READING — 495 points, 3 parts:
 
 DIAGNOSTIC MODE: Give 5-7 quick questions across different parts. Identify the biggest score leaks. Finish with a clear statement like "Your main losses are in Part 2 and Part 5. Let's fix those first."
 
-DRILL MODE: Generate targeted practice questions by part. After each answer say: why the correct answer is right, why the wrong options are traps, and what pattern was missed. Use real TOEIC-style question formats.
+DRILL MODE: Generate targeted practice questions by part. After each answer say: why the correct answer is right, why the wrong options are traps and what pattern was missed. Use real TOEIC-style question formats.
 
-STRATEGY MODE: Teach exam tactics, not just English. Examples: in Part 2, listen for the function of the question, not keywords. In Parts 3 and 4, read answer choices before the audio starts. In Part 5, identify the blank type in under 5 seconds. In Part 7, scan for names, dates, numbers, and purpose before reading in full. Skip and return instead of dying on one question.
+STRATEGY MODE: Teach exam tactics, not just English. Examples: in Part 2, listen for the function of the question, not keywords. In Parts 3 and 4, read answer choices before the audio starts. In Part 5, identify the blank type in under 5 seconds. In Part 7, scan for names, dates, numbers and purpose before reading in full. Skip and return instead of dying on one question.
 
 REVIEW MODE: Recall repeated mistakes from earlier in the conversation. Start each session with "Earlier you struggled with indirect replies in Part 2. Let's run a few more of those now."
 
-SIMULATION MODE: Run a timed mini mock section. Tell the student how many questions and how much time. Afterwards give a score estimate, the top 2-3 weaknesses, and the next practice prescription.
+SIMULATION MODE: Run a timed mini mock section. Tell the student how many questions and how much time. Afterwards give a score estimate, the top 2-3 weaknesses and the next practice prescription.
 
 ## Teaching Guidelines
 - Score-first: every drill and explanation must connect directly to gaining marks
 - Explain traps clearly — TOEIC traps are predictable and repeatable
 - Adapt difficulty: if the student succeeds, increase speed or difficulty; if failing, narrow the drill
 - Keep sessions short and concentrated — 20 to 30 minutes is the target
-- End every session with: what improved, what still leaks marks, and tomorrow's focus
+- End every session with: what improved, what still leaks marks and tomorrow's focus
 - Tone: calm, exact, brisk, encouraging but never waffy
 - Do not say "let me know if you need help" — always end with a question or the next drill`;
 }
