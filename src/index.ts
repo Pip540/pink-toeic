@@ -172,6 +172,15 @@ self.addEventListener('fetch', e => {
       });
     }
 
+    // Jenny avatar
+    if (request.method === 'GET' && url.pathname === '/jenny.png') {
+      const obj = await env.CONTENT.get('jenny.png');
+      if (!obj) return new Response('Not found', { status: 404 });
+      return new Response(obj.body, {
+        headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=604800' },
+      });
+    }
+
     // PWA — Icons (served from R2)
     if (request.method === 'GET' && (url.pathname === '/icon-192.png' || url.pathname === '/icon-512.png' || url.pathname === '/apple-touch-icon.png')) {
       const key = url.pathname.slice(1);

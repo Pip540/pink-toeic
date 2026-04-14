@@ -111,6 +111,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
 <!-- Language Modal -->
 <div id="lang-overlay" class="overlay">
   <div class="overlay-box">
+    <img src="/jenny.png" alt="Jenny" style="width:140px;height:140px;object-fit:cover;object-position:top;border-radius:50%;display:block;margin:0 auto 1.25rem;box-shadow:0 0 40px rgba(255,61,160,0.3);border:2px solid rgba(255,61,160,0.4);" />
     <h2>${name}</h2>
     <p>TOEIC Score Coach — choose your language to begin</p>
     <select id="lang-select">
