@@ -579,9 +579,28 @@ function renderPrivacyPage(): string {
     <li><strong>ElevenLabs</strong> — voice. Text is sent for audio generation only</li>
     <li><strong>Resend</strong> — email, for feedback notifications only</li>
   </ul>
-  <h2>Your Rights</h2>
-  <p>To exercise any GDPR rights, contact: <a href="mailto:dodecahedron108@gmail.com">dodecahedron108@gmail.com</a></p>
-  <footer><p>&copy; 2026 Asia Connect. All rights reserved. &nbsp;|&nbsp; <a href="/">Back to Pink</a> &nbsp;|&nbsp; <a href="/terms">Terms of Service</a></p></footer>
+  <h2>Your Rights Under GDPR (UK and EU Users)</h2>
+  <ul>
+    <li><strong>Right to access</strong> — you can ask us what information we hold</li>
+    <li><strong>Right to correction</strong> — you can ask us to correct any wrong information</li>
+    <li><strong>Right to deletion</strong> — you can ask us to delete your information</li>
+    <li><strong>Right to complain</strong> — you can complain to your national data protection authority</li>
+  </ul>
+
+  <h2>Your Rights Under Vietnamese Law (Nguoi dung Viet Nam)</h2>
+  <p>If you are located in Vietnam, you have the following rights under Vietnam's Personal Data Protection Law (effective 1 January 2026):</p>
+  <ul>
+    <li><strong>Right to know</strong> — you have the right to know what personal data we collect and how we use it</li>
+    <li><strong>Right to consent</strong> — we will only collect your data with your explicit consent</li>
+    <li><strong>Right to access</strong> — you can ask us what information we hold about you</li>
+    <li><strong>Right to correction</strong> — you can ask us to correct any inaccurate information</li>
+    <li><strong>Right to deletion</strong> — you can ask us to delete your information at any time</li>
+    <li><strong>Right to restrict processing</strong> — you can ask us to stop using your data while a complaint is reviewed</li>
+    <li><strong>Right to complain</strong> — you may complain to Vietnam's Ministry of Public Security, Department of Cybersecurity and Hi-tech Crime Prevention (A05)</li>
+  </ul>
+  <p><strong>Cross-border data transfer:</strong> Your session data is processed by Cloudflare (USA/EU) and Anthropic (USA). By using Pink TOEIC you consent to this transfer. Your conversation content is never stored — only anonymous session metadata is retained.</p>
+  <p>To exercise any of these rights, contact: <a href="mailto:dodecahedron108@gmail.com">dodecahedron108@gmail.com</a></p>
+  <footer><p>&copy; 2026 Netizen9. All rights reserved. &nbsp;|&nbsp; <a href="/">Back to Pink</a> &nbsp;|&nbsp; <a href="/terms">Terms of Service</a></p></footer>
 </body>
 </html>`;
 }
