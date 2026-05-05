@@ -360,7 +360,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
       language = profile.language;
       applyFormTranslations(language);
 
-      if (ACCESS_GATE && localStorage.getItem(UNLOCK_KEY) !== 'true') {
+      if (ACCESS_GATE && !localStorage.getItem(UNLOCK_KEY)) {
         document.getElementById('lang-overlay').style.display = 'none';
         document.getElementById('access-overlay').style.display = 'flex';
         return;
@@ -421,7 +421,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
     };
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
 
-    if (ACCESS_GATE && localStorage.getItem(UNLOCK_KEY) !== 'true') {
+    if (ACCESS_GATE && !localStorage.getItem(UNLOCK_KEY)) {
       document.getElementById('overlay').style.display = 'none';
       document.getElementById('access-overlay').style.display = 'flex';
       return;
@@ -442,7 +442,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
       var res = await fetch('/verify', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ code: code }) });
       var data = await res.json();
       if (data.ok) {
-        localStorage.setItem(UNLOCK_KEY, 'true');
+        localStorage.setItem(UNLOCK_KEY, code);
         document.getElementById('access-overlay').style.display = 'none';
         showChat();
       } else {
@@ -599,7 +599,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
     if (window._pinkAudio) { window._pinkAudio.pause(); window._pinkAudio = null; }
     document.querySelectorAll('.btn-speak.speaking').forEach(function(b) { b.classList.remove('speaking'); b.textContent = 'Listen'; });
     btn.textContent = 'Loading...';
-    fetch('/speak', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ text: text }) })
+    fetch('/speak', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ text: text, access_code: localStorage.getItem(UNLOCK_KEY) || '' }) })
       .then(function(r) { return r.blob(); })
       .then(function(blob) {
         var url = URL.createObjectURL(blob);

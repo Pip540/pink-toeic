@@ -608,13 +608,22 @@ function renderPrivacyPage(): string {
 // ── ElevenLabs TTS Handler ─────────────────────────────────────────────────────
 
 async function handleSpeak(request: Request, env: Env): Promise<Response> {
-  let body: { text: string };
+  let body: { text: string; access_code?: string };
   try {
-    body = await request.json() as { text: string };
+    body = await request.json() as { text: string; access_code?: string };
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
       status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
     });
+  }
+  if (env.ACCESS_GATE === 'true') {
+    const provided = (body.access_code || '').trim().toLowerCase();
+    const expected = (env.ACCESS_CODE || '').trim().toLowerCase();
+    if (!provided || provided !== expected) {
+      return new Response(JSON.stringify({ error: 'Subscribers only' }), {
+        status: 403, headers: { 'Content-Type': 'application/json', ...CORS },
+      });
+    }
   }
   if (!body.text?.trim()) {
     return new Response(JSON.stringify({ error: 'No text' }), {
@@ -703,6 +712,21 @@ async function handleChat(request: Request, env: Env, ctx: ExecutionContext): Pr
     return new Response(JSON.stringify({ error: 'No messages provided' }), {
       status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
     });
+  }
+
+  // Server-side daily cap: 10 questions per device per day
+  const studentId = (profile.student_id || '').trim();
+  if (studentId) {
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+    const row = await env.DB.prepare(
+      'SELECT COUNT(*) as c FROM sessions WHERE student_id = ? AND timestamp >= ?'
+    ).bind(studentId, todayStart.getTime()).first<{ c: number }>();
+    if (row && (row.c as number) >= 10) {
+      return new Response(JSON.stringify({ error: "You've reached today's limit of 10 questions. Come back tomorrow!" }), {
+        status: 429, headers: { 'Content-Type': 'application/json', ...CORS },
+      });
+    }
   }
 
   const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
