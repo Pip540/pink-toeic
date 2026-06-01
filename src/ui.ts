@@ -5,6 +5,25 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <meta name="theme-color" content="#121212"/>
+  <script>
+    var turnstileToken = '';
+    var tsRendered = false;
+    function waitForTurnstile() {
+      if (window.turnstile && !tsRendered) {
+        tsRendered = true;
+        window.turnstile.render('#cf-turnstile', {
+          sitekey: '0x4AAAAAADcmXESejsluEa9b',
+          callback: function(t) { turnstileToken = t; },
+          'refresh-expired': 'auto',
+          theme: 'dark'
+        });
+      } else if (!tsRendered) {
+        setTimeout(waitForTurnstile, 200);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(waitForTurnstile, 500); });
+  </script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <title>${name} — TOEIC Score Coach</title>
@@ -104,6 +123,10 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
 
     /* ── daily limit notice ── */
     #daily-limit-msg{display:none;padding:1rem;text-align:center;color:var(--muted);font-size:0.82rem}
+
+    /* ── floating feedback button ── */
+    #btn-float-feedback{position:fixed;bottom:1.25rem;right:1.25rem;z-index:200;background:var(--pink);border:none;border-radius:8px;color:#121212;font-family:var(--font);font-size:0.8rem;font-weight:700;padding:0.55rem 1.1rem;cursor:pointer;box-shadow:0 4px 18px rgba(244,114,182,0.5)}
+    #btn-float-feedback:hover{background:var(--pink-muted)}
   </style>
 </head>
 <body>
@@ -132,6 +155,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
       <option value="Russian">Russkiy (Russian)</option>
     </select>
     <button class="btn-primary" id="btn-lang-confirm">Continue</button>
+    <p style="font-size:0.65rem;color:var(--muted);text-align:center;margin-top:1rem;line-height:1.5">Pink is not affiliated with or endorsed by ETS or any examination body. TOEIC is a registered trademark of ETS.</p>
   </div>
 </div>
 
@@ -212,6 +236,9 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
     <button class="btn-secondary" id="btn-feedback-close">Cancel</button>
   </div>
 </div>
+
+<!-- Floating Feedback Button -->
+<button id="btn-float-feedback">Feedback</button>
 
 <!-- Chat Screen -->
 <div id="chat-screen">
@@ -490,7 +517,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
     document.getElementById('btn-send').disabled = true;
     var msg = document.getElementById('daily-limit-msg');
     msg.style.display = 'block';
-    msg.textContent = 'You have reached your 10 question limit for today. Come back tomorrow to continue training.';
+    msg.innerHTML = 'You have reached your 10 question limit for today. Come back tomorrow to continue training.<br><br>Enjoying Pink? We are still testing — hit the <strong style="color:var(--pink)">Feedback</strong> button and let us know how it went.';
   }
 
   // ── Message Bubbles ───────────────────────────────────────────────────────────
@@ -619,6 +646,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
     var input = document.getElementById('user-input');
     var text = input.value.trim();
     if (!text || isStreaming) return;
+    if (!turnstileToken) return;
 
     if (isDailyLimitReached()) {
       showDailyLimitMessage();
@@ -647,6 +675,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
         body: JSON.stringify({
           messages: history.slice(-20).map(function(m) { return { role: m.role, content: m.content }; }),
           profile: Object.assign({}, profile, { session_id: sessionId }),
+          turnstile_token: turnstileToken,
         }),
       });
 
@@ -735,9 +764,9 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
 
   // ── Feedback ──────────────────────────────────────────────────────────────────
 
-  document.getElementById('btn-feedback-open').onclick = function() {
-    document.getElementById('feedback-overlay').style.display = 'flex';
-  };
+  function openFeedback() { document.getElementById('feedback-overlay').style.display = 'flex'; }
+  document.getElementById('btn-feedback-open').onclick = openFeedback;
+  document.getElementById('btn-float-feedback').onclick = openFeedback;
   document.getElementById('btn-feedback-close').onclick = function() {
     document.getElementById('feedback-overlay').style.display = 'none';
   };
@@ -792,6 +821,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
   boot();
 })();
 </script>
+<div id="cf-turnstile" style="position:fixed;left:-9999px;top:-9999px"></div>
 </body>
 </html>`;
 }

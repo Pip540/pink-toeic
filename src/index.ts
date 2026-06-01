@@ -16,6 +16,7 @@ export interface Env {
   ADMIN_PASSWORD: string;
   DASHBOARD_PASSWORD: string;
   MASTER_PASSWORD: string;
+  TURNSTILE_SECRET: string;
   CHAT_RATE_LIMITER: { limit: (options: { key: string }) => Promise<{ success: boolean }> };
 }
 
@@ -32,6 +33,7 @@ interface Message {
 interface ChatRequest {
   messages: Message[];
   profile: Record<string, string>;
+  turnstile_token?: string;
 }
 
 interface ManifestEntry {
@@ -52,7 +54,7 @@ const SECURITY = {
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
 };
 
 export default {
@@ -691,6 +693,28 @@ async function handleSpeak(request: Request, env: Env): Promise<Response> {
 
 async function handleChat(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+
+  // Turnstile verification
+  const rawBody = await request.text();
+  let parsedBody: ChatRequest;
+  try { parsedBody = JSON.parse(rawBody) as ChatRequest; } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+      status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+    });
+  }
+  const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `secret=${encodeURIComponent(env.TURNSTILE_SECRET)}&response=${encodeURIComponent(parsedBody.turnstile_token || '')}`,
+  });
+  const tsData = await tsRes.json() as { success: boolean };
+  if (!tsData.success) {
+    return new Response(JSON.stringify({ error: 'Bot verification failed. Please refresh the page and try again.' }), {
+      status: 403, headers: { 'Content-Type': 'application/json', ...CORS },
+    });
+  }
+
+  // Rate limiting
   const { success } = await env.CHAT_RATE_LIMITER.limit({ key: ip });
   if (!success) {
     return new Response(JSON.stringify({ error: 'Too many requests. Please wait a moment.' }), {
@@ -698,18 +722,17 @@ async function handleChat(request: Request, env: Env, ctx: ExecutionContext): Pr
     });
   }
 
-  let body: ChatRequest;
-  try {
-    body = await request.json() as ChatRequest;
-  } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
-      status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
-    });
-  }
-
+  const body = parsedBody;
   const { messages, profile } = body;
   if (!messages || messages.length === 0) {
     return new Response(JSON.stringify({ error: 'No messages provided' }), {
+      status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+    });
+  }
+  const lastMsg = [...messages].reverse().find(m => m.role === 'user');
+  const lastText = typeof lastMsg?.content === 'string' ? lastMsg.content : '';
+  if (lastText.length > 4000) {
+    return new Response(JSON.stringify({ error: 'Message too long. Please keep your message under 4,000 characters.' }), {
       status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
     });
   }
