@@ -8,10 +8,11 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
   <script>
     var turnstileToken = '';
     var tsRendered = false;
+    var tsWidgetId = null;
     function waitForTurnstile() {
       if (window.turnstile && !tsRendered) {
         tsRendered = true;
-        window.turnstile.render('#cf-turnstile', {
+        tsWidgetId = window.turnstile.render('#cf-turnstile', {
           sitekey: '0x4AAAAAADcmXESejsluEa9b',
           callback: function(t) { turnstileToken = t; },
           'refresh-expired': 'auto',
@@ -19,6 +20,12 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
         });
       } else if (!tsRendered) {
         setTimeout(waitForTurnstile, 200);
+      }
+    }
+    function resetTurnstile() {
+      turnstileToken = '';
+      if (window.turnstile && tsWidgetId !== null) {
+        window.turnstile.reset(tsWidgetId);
       }
     }
     document.addEventListener('DOMContentLoaded', function() { setTimeout(waitForTurnstile, 500); });
@@ -736,6 +743,7 @@ export function renderChatUI(name: string, greeting: string, accessGate: boolean
       var lifetimeCount = parseInt(localStorage.getItem(LIFETIME_KEY) || '0') + 1;
       localStorage.setItem(LIFETIME_KEY, String(lifetimeCount));
       checkMilestones(lifetimeCount);
+      resetTurnstile();
 
       if (isDailyLimitReached()) {
         showDailyLimitMessage();

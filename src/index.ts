@@ -694,7 +694,6 @@ async function handleSpeak(request: Request, env: Env): Promise<Response> {
 async function handleChat(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
 
-  // Turnstile verification
   const rawBody = await request.text();
   let parsedBody: ChatRequest;
   try { parsedBody = JSON.parse(rawBody) as ChatRequest; } catch {
@@ -702,6 +701,7 @@ async function handleChat(request: Request, env: Env, ctx: ExecutionContext): Pr
       status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
     });
   }
+
   const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -714,7 +714,6 @@ async function handleChat(request: Request, env: Env, ctx: ExecutionContext): Pr
     });
   }
 
-  // Rate limiting
   const { success } = await env.CHAT_RATE_LIMITER.limit({ key: ip });
   if (!success) {
     return new Response(JSON.stringify({ error: 'Too many requests. Please wait a moment.' }), {
